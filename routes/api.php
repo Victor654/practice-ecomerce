@@ -28,5 +28,10 @@ Route::group([
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
+    Route::get('get/failures/token', 'AuthController@tokenFailures')->name('token_failures');
 
+    //Lead routes
+    Route::post('register/lead/{token}', 'LeadController@registerLead');
+    Route::get('lead/{lead_id}/{token}', 'LeadController@getLead');
+    Route::get('leads/{token}', 'LeadController@getLeads');
 });
