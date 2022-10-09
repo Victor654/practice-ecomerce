@@ -13,7 +13,7 @@ class UserOwnerSeeder extends Seeder
     {
         DB::table('users')->insert([
             'username' => "tester_agent",
-            'password' => "PASSWORDAGENT",
+            'password' => Hash::make('password'),
             'is_active' => "true",
             'role' => "agent"
         ]);

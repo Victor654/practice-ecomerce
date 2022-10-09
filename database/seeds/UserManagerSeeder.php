@@ -13,7 +13,7 @@ class UserManagerSeeder extends Seeder
     {
         DB::table('users')->insert([
             'username' => "tester_manager",
-            'password' => "PASSWORDMANAGER",
+            'password' => Hash::make('password'),
             'is_active' => "true",
             'role' => "manager"
         ]);
