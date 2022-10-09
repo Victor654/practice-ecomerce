@@ -14,9 +14,20 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api', ['except' => ['login', 'tokenFailures']]);
     }
 
+    public function tokenFailures()
+    {
+        $meta =  [
+            'success' => false,
+            'errors' => [
+                'Token expired'
+            ]
+        ];
+
+        return response()->json(['meta' => $meta], 401);
+    }
     /**
      * Get a JWT via given credentials.
      *
@@ -24,23 +35,33 @@ class AuthController extends Controller
      */
     public function login()
     {
-            $credentials = request(['username', 'password']);
-            if (! $token = auth()->attempt($credentials)) {
-                $meta =  [
-                    'success' => true,
-                    'errors' => [
-                        "Password incorrect for: ".  request('username')
-                    ]
-                ];
+        $credentials = request(['username', 'password']);
+        if (! $token = auth()->attempt($credentials)) {
+            $meta =  [
+                'success' => false,
+                'errors' => [
+                    "Password incorrect for: ".  request('username')
+                ]
+            ];
 
-                return response()->json(['meta' => $meta], 401);
-            }
-    
+            return response()->json(['meta' => $meta], 401);
+        }
+
+        if ( auth()->user()->is_active) {
             auth()->user()->last_login = date('Y-m-d H:i:s');
             auth()->user()->save();
     
             return $this->respondWithToken($token);
+        } else {
+            $meta =  [
+                'success' => false,
+                'errors' => [
+                    "User no active"
+                ]
+            ];
 
+            return response()->json(['meta' => $meta], 401);
+        }
     }
 
     /**
@@ -62,7 +83,20 @@ class AuthController extends Controller
     {
         auth()->logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        
+        $meta =  [
+            'success' => true,
+            'errors' => []
+        ];
+
+        $data =  [
+            'message' => 'Successfully logged out'
+        ];
+
+        return response()->json([
+            'meta' => $meta,
+            'data' => $data
+        ], 202);
     }
 
     /**
@@ -92,7 +126,7 @@ class AuthController extends Controller
 
         $data =  [
             'token' => $token,
-            'minutes_to_expire' => auth()->factory()->getTTL() * 24
+            'minutes_to_expire' => auth()->factory()->getTTL()
         ];
 
         return response()->json([
