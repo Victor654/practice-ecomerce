@@ -12,8 +12,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Eloquent implements JWTSubject, Authenticatable
 {
-    protected $connection = 'mongodb';
-
     use Notifiable, AuthenticatableTrait;
     public $timestamps = false;
     /**
